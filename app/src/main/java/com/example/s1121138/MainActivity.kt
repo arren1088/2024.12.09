@@ -41,8 +41,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun FullScreenContent() {
     val context = LocalContext.current as? ComponentActivity
-
-    // 定义背景颜色列表
+    
     val colors = listOf(
         Color(0xff95fe95),
         Color(0xfffdca0f),
@@ -52,11 +51,14 @@ fun FullScreenContent() {
     var currentColorIndex by remember { mutableStateOf(0) }
     var dragDirection by remember { mutableStateOf(0) }
     var elapsedTime by remember { mutableStateOf(0) }
-
+    var imageOffsetX by remember { mutableStateOf(0f) }
+    val screenWidth = LocalContext.current.resources.displayMetrics.widthPixels / LocalContext.current.resources.displayMetrics.density
+    
     LaunchedEffect(Unit) {
-        while (true) {
+        while (imageOffsetX < screenWidth) {
             delay(1000)
             elapsedTime += 1
+            imageOffsetX += 17f
         }
     }
 
@@ -82,39 +84,54 @@ fun FullScreenContent() {
                         dragDirection = 0
                     }
                 )
-            },
-        contentAlignment = Alignment.TopCenter
+            }
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
+
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.TopCenter
         ) {
-            Text(text = "2024期末上機考(資管二B陳恩儒)")
-            Spacer(modifier = Modifier.height(16.dp))
-            Image(
-                painter = painterResource(id = R.drawable.class_b),
-                contentDescription = "B班同學"
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "遊戲持續時間 0 秒")
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "您的成績 0 分")
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Button(
-                onClick = {
-                    context?.apply {
-                        finishAffinity()
-                        System.exit(0)
-                    }
-                },
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
                 modifier = Modifier.padding(top = 16.dp)
             ) {
-                Text(text = "關閉應用")
+                Text(text = "2024期末上機考(資管二B陳恩儒)")
+                Spacer(modifier = Modifier.height(3.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.class_b),
+                    contentDescription = "B班同學"
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(text = "遊戲持續時間 $elapsedTime 秒")
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(text = "您的成績 0 分")
+                Spacer(modifier = Modifier.height(6.dp))
+                Button(
+                    onClick = {
+                        context?.apply {
+                            finishAffinity()
+                            System.exit(0)
+                        }
+                    },
+                    modifier = Modifier.padding(top = 6.dp)
+                ) {
+                    Text(text = "關閉應用")
+                }
             }
+        }
+
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.maria2),
+                contentDescription = "Maria2",
+                modifier = Modifier
+                    .size(200.dp)
+                    .offset(x = imageOffsetX.dp, y = 0.dp)
+            )
         }
     }
 }
