@@ -20,4 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "s1121138"
-include(":apdp")
+include(":app")
