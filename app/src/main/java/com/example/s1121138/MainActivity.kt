@@ -20,10 +20,12 @@ import androidx.compose.ui.platform.LocalContext
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import com.example.s1121138.ui.theme.S1121138Theme
 import androidx.compose.runtime.*
 import androidx.compose.ui.input.pointer.pointerInput
 import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,31 +43,59 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun FullScreenContent() {
     val context = LocalContext.current as? ComponentActivity
-    
+
     val colors = listOf(
-        Color(0xff95fe95),
-        Color(0xfffdca0f),
-        Color(0xfffea4a4),
-        Color(0xffa5dfed)
+        Color(0xff95fe95), // 綠色
+        Color(0xfffdca0f), // 黃色
+        Color(0xfffea4a4), // 粉紅色
+        Color(0xffa5dfed)  // 藍色
     )
     var currentColorIndex by remember { mutableStateOf(0) }
     var dragDirection by remember { mutableStateOf(0) }
     var elapsedTime by remember { mutableStateOf(0) }
+    var score by remember { mutableStateOf(0) }
     var imageOffsetX by remember { mutableStateOf(0f) }
     val screenWidth = LocalContext.current.resources.displayMetrics.widthPixels / LocalContext.current.resources.displayMetrics.density
-    
+    var mariaImageRes by remember { mutableStateOf(R.drawable.maria0) }
+    var mariaColorIndex by remember { mutableStateOf(Random.nextInt(colors.size)) }
+
     LaunchedEffect(Unit) {
-        while (imageOffsetX < screenWidth) {
+        while (true) {
             delay(1000)
             elapsedTime += 1
-            imageOffsetX += 17f
+            if (imageOffsetX < screenWidth) {
+                imageOffsetX += 17f
+            }
         }
+    }
+
+    fun resetMaria() {
+        imageOffsetX = 0f
+        mariaImageRes = listOf(
+            R.drawable.maria0,
+            R.drawable.maria1,
+            R.drawable.maria2,
+            R.drawable.maria3
+        ).random()
+        mariaColorIndex = Random.nextInt(colors.size) // 隨機設定瑪利亞的顏色索引
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(colors[currentColorIndex])
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        if (mariaColorIndex == currentColorIndex) {
+                            score += 1 // 背景顏色相同，得分加1
+                        } else {
+                            score -= 1 // 背景顏色不同，扣1分
+                        }
+                        resetMaria()
+                    }
+                )
+            }
             .pointerInput(Unit) {
                 detectHorizontalDragGestures(
                     onHorizontalDrag = { _, dragAmount ->
@@ -105,7 +135,7 @@ fun FullScreenContent() {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(text = "遊戲持續時間 $elapsedTime 秒")
                 Spacer(modifier = Modifier.height(6.dp))
-                Text(text = "您的成績 0 分")
+                Text(text = "您的成績 $score 分")
                 Spacer(modifier = Modifier.height(6.dp))
                 Button(
                     onClick = {
@@ -126,8 +156,8 @@ fun FullScreenContent() {
             contentAlignment = Alignment.BottomStart
         ) {
             Image(
-                painter = painterResource(id = R.drawable.maria2),
-                contentDescription = "Maria2",
+                painter = painterResource(id = mariaImageRes),
+                contentDescription = "Maria",
                 modifier = Modifier
                     .size(200.dp)
                     .offset(x = imageOffsetX.dp, y = 0.dp)
